@@ -1,0 +1,12 @@
+enabled,code,name,asset_class,note
+1,159915,创业板ETF,equity_cn_growth,growth board momentum
+1,510300,沪深300ETF,equity_cn_large,broad A-share core
+1,512890,红利低波ETF,equity_cn_style,dividend low-vol defensive equity
+1,159920,恒生ETF,equity_hk,Hong Kong equity proxy
+1,513520,日经ETF,equity_jp,Japan equity proxy
+1,513310,中韩半导体ETF,equity_kr,Korea semiconductor proxy
+1,513300,纳斯达克ETF,equity_us,US growth exposure
+1,518880,黄金ETF,commodity,gold hedge
+1,511580,国债政金债ETF招商,bond,policy-bank bond defensive asset
+1,561360,石油ETF国泰,commodity,oil commodity trend
+1,159985,豆粕ETF华夏,commodity,agriculture commodity trend

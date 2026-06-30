@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+*.app
+
+# Build outputs
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Qt / IDE local state
+*.user
+*.autosave
+.qtc_clangd/
+.idea/
+.vscode/
+
+# Runtime data and caches
+data/
+logs/
+cache/
+etf/
+exports/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python helper caches
+__pycache__/
+*.pyc
+.pytest_cache/
