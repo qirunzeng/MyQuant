@@ -10,6 +10,26 @@ This repository is an independent implementation. It does not copy source code, 
 - Review notes with local SQLite storage and Markdown export.
 - Local settings for data paths, Python/AkShare configuration, theme, backup/export, and cache cleanup.
 
+## Screenshots
+
+### ETF Run Configuration
+
+Persisted run parameters, local qfq cache checks, and AkShare refresh controls.
+
+![ETF run configuration](docs/screenshots/etf-run-config.png)
+
+### Backtest Data And Holdings
+
+Backtest metrics, data quality checks, simulated current holdings, and real holding P/L review.
+
+![ETF backtest data and holdings](docs/screenshots/etf-backtest-data.png)
+
+### Interactive Charts
+
+Net value, drawdown, factor candidates, and per-symbol buy/sell point charts with hover details and time-axis zoom.
+
+![ETF interactive charts](docs/screenshots/etf-charts.png)
+
 ## Build
 
 ```bash
