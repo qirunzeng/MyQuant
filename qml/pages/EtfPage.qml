@@ -263,6 +263,31 @@ Item {
         var p = etfController.portfolio || {}
         availableCashText = String(Number(p.availableCash || 0).toFixed(2))
         portfolioRows = JSON.parse(JSON.stringify(p.positions || []))
+        reloadRunConfig()
+    }
+
+    function reloadRunConfig() {
+        var p = etfController.portfolio || {}
+        var c = p.runConfig || {}
+        if (startEdit)
+            startEdit.text = String(c.startDate || "20210101")
+        if (endEdit)
+            endEdit.text = String(c.endDate || "")
+        if (holdSpin)
+            holdSpin.value = Math.max(holdSpin.from, Math.min(holdSpin.to, Number(c.holdNum || 4)))
+        if (cashEdit)
+            cashEdit.text = String(Number(c.targetCashRatio === undefined ? 0.25 : c.targetCashRatio))
+        if (stopEdit)
+            stopEdit.text = String(Number(c.stopLossRate === undefined ? 0.07 : c.stopLossRate))
+        if (capitalEdit)
+            capitalEdit.text = String(Number(c.initialCapital || 40000))
+    }
+
+    function saveRunConfig() {
+        availableCashText = String(Number(availableCashText || 0))
+        return etfController.saveRunConfig(startEdit.text, endEdit.text, holdSpin.value,
+                                           Number(cashEdit.text), Number(stopEdit.text),
+                                           Number(capitalEdit.text), Number(availableCashText))
     }
 
     function updatePortfolioRow(index, key, value) {
@@ -369,6 +394,7 @@ Item {
                     Layout.preferredWidth: 168
                     Layout.preferredHeight: 42
                     onClicked: {
+                        page.saveRunConfig()
                         page.savePortfolio()
                         etfController.runDefault(true, startEdit.text, endEdit.text,
                                                  holdSpin.value, Number(cashEdit.text),
@@ -438,12 +464,17 @@ Item {
                             Layout.preferredWidth: 118
                             onEditingFinished: page.availableCashText = text
                         }
+                        Button {
+                            text: "保存配置"
+                            Layout.preferredWidth: 150
+                            onClicked: page.saveRunConfig()
+                        }
                         Label { text: "数据补齐"; color: "#92a6bc" }
                         Label {
                             text: "自动判断缓存缺口，必要时调用 AkShare"
                             color: "#92a6bc"
                             wrapMode: Text.WordWrap
-                            Layout.columnSpan: 3
+                            Layout.columnSpan: 2
                             Layout.fillWidth: true
                         }
                         Label {

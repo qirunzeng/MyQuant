@@ -52,6 +52,9 @@ public:
     Q_INVOKABLE bool saveUniverse(const QVariantList& rows);
     Q_INVOKABLE void refreshPortfolio();
     Q_INVOKABLE bool savePortfolio(double availableCash, const QVariantList& positions);
+    Q_INVOKABLE bool saveRunConfig(const QString& startDate, const QString& endDate, int holdNum,
+                                   double targetCashRatio, double stopLossRate, double initialCapital,
+                                   double availableCash);
     Q_INVOKABLE bool openEtfFolder();
 
 signals:

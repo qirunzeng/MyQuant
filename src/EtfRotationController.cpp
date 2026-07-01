@@ -295,7 +295,16 @@ bool EtfRotationController::ensureSeed() {
     if (!QFileInfo::exists(accountPath())) {
         QSaveFile f(accountPath());
         if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            f.write(QJsonDocument(QJsonObject{{"availableCash", 40000.0}}).toJson(QJsonDocument::Indented));
+            f.write(QJsonDocument(QJsonObject{
+                                      {"availableCash", 40000.0},
+                                      {"runConfig", QJsonObject{{"startDate", "20210101"},
+                                                               {"endDate", ""},
+                                                               {"holdNum", 4},
+                                                               {"targetCashRatio", 0.25},
+                                                               {"stopLossRate", 0.07},
+                                                               {"initialCapital", 40000.0}}},
+                                  })
+                        .toJson(QJsonDocument::Indented));
             f.commit();
         }
     }
@@ -368,10 +377,27 @@ bool EtfRotationController::saveUniverse(const QVariantList& rows) {
 QVariantMap EtfRotationController::loadPortfolio() const {
     QVariantMap portfolio;
     double availableCash = 40000.0;
+    QVariantMap runConfig{{"startDate", "20210101"},
+                          {"endDate", ""},
+                          {"holdNum", 4},
+                          {"targetCashRatio", 0.25},
+                          {"stopLossRate", 0.07},
+                          {"initialCapital", 40000.0}};
     QFile account(accountPath());
     if (account.open(QIODevice::ReadOnly | QIODevice::Text)) {
         const QJsonObject obj = QJsonDocument::fromJson(account.readAll()).object();
         availableCash = obj.value("availableCash").toDouble(availableCash);
+        const QJsonObject savedConfig = obj.value("runConfig").toObject();
+        if (!savedConfig.isEmpty()) {
+            runConfig["startDate"] = savedConfig.value("startDate").toString(runConfig.value("startDate").toString());
+            runConfig["endDate"] = savedConfig.value("endDate").toString(runConfig.value("endDate").toString());
+            runConfig["holdNum"] = savedConfig.value("holdNum").toInt(runConfig.value("holdNum").toInt());
+            runConfig["targetCashRatio"] =
+                savedConfig.value("targetCashRatio").toDouble(runConfig.value("targetCashRatio").toDouble());
+            runConfig["stopLossRate"] = savedConfig.value("stopLossRate").toDouble(runConfig.value("stopLossRate").toDouble());
+            runConfig["initialCapital"] =
+                savedConfig.value("initialCapital").toDouble(runConfig.value("initialCapital").toDouble());
+        }
     }
 
     QHash<QString, QVariantMap> byCode;
@@ -418,6 +444,7 @@ QVariantMap EtfRotationController::loadPortfolio() const {
         positions.append(row);
     }
     portfolio["availableCash"] = availableCash;
+    portfolio["runConfig"] = runConfig;
     portfolio["positions"] = positions;
     return portfolio;
 }
@@ -459,7 +486,20 @@ bool EtfRotationController::savePortfolio(double availableCash, const QVariantLi
         setStatus("保存账户现金失败");
         return false;
     }
-    account.write(QJsonDocument(QJsonObject{{"availableCash", std::max(0.0, availableCash)}}).toJson(QJsonDocument::Indented));
+    QJsonObject accountObj;
+    QFile existingAccount(accountPath());
+    if (existingAccount.open(QIODevice::ReadOnly | QIODevice::Text))
+        accountObj = QJsonDocument::fromJson(existingAccount.readAll()).object();
+    accountObj.insert("availableCash", std::max(0.0, availableCash));
+    if (!accountObj.contains("runConfig")) {
+        accountObj.insert("runConfig", QJsonObject{{"startDate", "20210101"},
+                                                   {"endDate", ""},
+                                                   {"holdNum", 4},
+                                                   {"targetCashRatio", 0.25},
+                                                   {"stopLossRate", 0.07},
+                                                   {"initialCapital", 40000.0}});
+    }
+    account.write(QJsonDocument(accountObj).toJson(QJsonDocument::Indented));
     if (!account.commit()) {
         setStatus("保存账户现金失败");
         return false;
@@ -494,6 +534,37 @@ bool EtfRotationController::savePortfolio(double availableCash, const QVariantLi
     refreshPortfolio();
     setStatus(ok ? "回测池、现金与真实持仓已保存" : "真实持仓保存失败");
     return ok;
+}
+
+bool EtfRotationController::saveRunConfig(const QString& startDate, const QString& endDate, int holdNum,
+                                          double targetCashRatio, double stopLossRate, double initialCapital,
+                                          double availableCash) {
+    ensureSeed();
+    QJsonObject accountObj;
+    QFile existing(accountPath());
+    if (existing.open(QIODevice::ReadOnly | QIODevice::Text))
+        accountObj = QJsonDocument::fromJson(existing.readAll()).object();
+    accountObj.insert("availableCash", std::max(0.0, availableCash));
+    accountObj.insert("runConfig", QJsonObject{{"startDate", compactDate(startDate).isEmpty() ? "20210101" : compactDate(startDate)},
+                                               {"endDate", compactDate(endDate)},
+                                               {"holdNum", std::clamp(holdNum, 1, 8)},
+                                               {"targetCashRatio", std::clamp(targetCashRatio, 0.0, 0.9)},
+                                               {"stopLossRate", std::clamp(stopLossRate, 0.0, 0.9)},
+                                               {"initialCapital", std::max(1000.0, initialCapital)}});
+    QSaveFile account(accountPath());
+    if (!account.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        setStatus("保存运行配置失败");
+        return false;
+    }
+    account.write(QJsonDocument(accountObj).toJson(QJsonDocument::Indented));
+    if (!account.commit()) {
+        setStatus("保存运行配置失败");
+        return false;
+    }
+    portfolio_ = loadPortfolio();
+    emit portfolioChanged();
+    setStatus("运行配置已保存");
+    return true;
 }
 
 QList<EtfRotationController::Bar> EtfRotationController::loadBarsFromPath(const QString& path) const {
