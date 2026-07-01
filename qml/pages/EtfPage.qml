@@ -36,6 +36,29 @@ Item {
         return Number(v).toFixed(2)
     }
 
+    function signedMoney(v) {
+        if (v === undefined || v === null || isNaN(Number(v)))
+            return "--"
+        var n = Number(v)
+        return (n > 0 ? "+" : "") + n.toFixed(2)
+    }
+
+    function pnlColor(v) {
+        var n = Number(v)
+        if (!isFinite(n) || Math.abs(n) < 0.000001)
+            return "#cbd5e1"
+        return n > 0 ? "#86efac" : "#fca5a5"
+    }
+
+    function scoreText(v) {
+        var n = Number(v)
+        if (!isFinite(n))
+            return "综合分 --"
+        if (Math.abs(n) >= 1000)
+            return "综合分 " + n.toFixed(2)
+        return "综合分 " + n.toFixed(3)
+    }
+
     function currentScrollY() {
         return scroll && scroll.contentItem ? scroll.contentItem.contentY : 0
     }
@@ -764,7 +787,7 @@ Item {
 
                     Label {
                         visible: page.filteredAdvice().length === 0
-                        text: "暂无操作建议。运行 ETF 轮动后，这里会按当前 ETF 池和真实持仓生成更详细的买入、卖出、持有与等待动作。"
+                        text: "暂无操作建议。运行 ETF 轮动后，这里会按 ETF 池启用标的、可用现金和真实持仓快照生成买入、卖出、持有与等待动作。"
                         color: "#8fa4ba"
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -876,6 +899,139 @@ Item {
             }
 
             RowLayout {
+                visible: page.activeEtfTab === 1
+                Layout.fillWidth: true
+                Layout.leftMargin: 18
+                Layout.rightMargin: 18
+                Layout.preferredHeight: visible ? 292 : 0
+                spacing: 14
+
+                SectionPanel {
+                    title: "回测当前持仓"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label { text: "持仓 " + money(etfController.metrics.backtestHoldingValue); color: "#7dd3fc"; font.bold: true }
+                        Label { text: "现金 " + money(etfController.metrics.backtestCash); color: "#8fa4ba" }
+                        Item { Layout.fillWidth: true }
+                        Label { text: "权益 " + money(etfController.metrics.backtestEquity); color: "#e8eef7"; font.bold: true }
+                    }
+
+                    Label {
+                        visible: etfController.backtestHoldings.length === 0
+                        text: "运行回测后显示策略在结束日的模拟持仓、成本、末价、市值和浮盈亏。"
+                        color: "#8fa4ba"
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+
+                    ListView {
+                        visible: etfController.backtestHoldings.length > 0
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        ScrollBar.vertical: AppScrollBar { orientation: Qt.Vertical; policy: ScrollBar.AlwaysOn }
+                        model: etfController.backtestHoldings
+                        header: Rectangle {
+                            width: ListView.view ? ListView.view.width - page.scrollBarGutter : 1
+                            height: 24
+                            color: "#0b1117"
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                Label { text: "标的"; color: "#64748b"; Layout.fillWidth: true }
+                                Label { text: "份额"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "末价"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "市值"; color: "#64748b"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: "盈亏"; color: "#64748b"; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
+                            }
+                        }
+                        delegate: Rectangle {
+                            width: Math.max(1, ListView.view.width - page.scrollBarGutter)
+                            height: 34
+                            color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: Number(modelData.shares || 0).toFixed(0); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.lastPrice); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.marketValue); color: "#cbd5e1"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: signedMoney(modelData.pnl) + " / " + pct(modelData.pnlRate); color: page.pnlColor(modelData.pnl); Layout.preferredWidth: 112; horizontalAlignment: Text.AlignRight }
+                            }
+                        }
+                    }
+                }
+
+                SectionPanel {
+                    title: "真实持仓盈亏"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label { text: "持仓 " + money(etfController.metrics.realHoldingValue); color: "#7dd3fc"; font.bold: true }
+                        Label { text: "现金 " + money(etfController.metrics.realCash); color: "#8fa4ba" }
+                        Item { Layout.fillWidth: true }
+                        Label { text: "浮盈亏 " + signedMoney(etfController.metrics.realPnl); color: page.pnlColor(etfController.metrics.realPnl); font.bold: true }
+                    }
+
+                    Label {
+                        visible: etfController.realHoldings.length === 0
+                        text: "在 ETF 池填写真实份额和成本价后，运行回测会用最新 qfq 收盘价估算真实持仓浮盈亏。"
+                        color: "#8fa4ba"
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+
+                    ListView {
+                        visible: etfController.realHoldings.length > 0
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        ScrollBar.vertical: AppScrollBar { orientation: Qt.Vertical; policy: ScrollBar.AlwaysOn }
+                        model: etfController.realHoldings
+                        header: Rectangle {
+                            width: ListView.view ? ListView.view.width - page.scrollBarGutter : 1
+                            height: 24
+                            color: "#0b1117"
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                Label { text: "标的"; color: "#64748b"; Layout.fillWidth: true }
+                                Label { text: "成本"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "最新"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "市值"; color: "#64748b"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: "盈亏"; color: "#64748b"; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
+                            }
+                        }
+                        delegate: Rectangle {
+                            width: Math.max(1, ListView.view.width - page.scrollBarGutter)
+                            height: 34
+                            color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: modelData.hasCost ? money(modelData.costPrice) : "未填"; color: modelData.hasCost ? "#9fb2c7" : "#fbbf24"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.lastPrice); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.marketValue); color: "#cbd5e1"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: modelData.hasCost ? signedMoney(modelData.pnl) + " / " + pct(modelData.pnlRate) : "--"; color: modelData.hasCost ? page.pnlColor(modelData.pnl) : "#64748b"; Layout.preferredWidth: 112; horizontalAlignment: Text.AlignRight }
+                            }
+                        }
+                    }
+                }
+            }
+
+            RowLayout {
                 visible: page.activeEtfTab === 4
                 Layout.fillWidth: true
                 Layout.leftMargin: 18
@@ -961,10 +1117,19 @@ Item {
                                 Layout.fillWidth: true
                                 Label { text: "#" + modelData.rank; color: "#64748b"; Layout.preferredWidth: 42 }
                                 Label { text: modelData.name + "  " + modelData.symbol; color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: Number(modelData.score || 0).toFixed(3); color: modelData.selected ? "#86efac" : "#94a3b8"; Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight }
+                                Label {
+                                    text: page.scoreText(modelData.score)
+                                    color: modelData.selected ? "#86efac" : "#94a3b8"
+                                    Layout.preferredWidth: 124
+                                    horizontalAlignment: Text.AlignRight
+                                    elide: Text.ElideRight
+                                    ToolTip.visible: hoverHandler.hovered
+                                    ToolTip.text: "综合分 = 20 日回归动量 * R2；按分数排序后取目标持有数"
+                                    HoverHandler { id: hoverHandler }
+                                }
                             }
                             Label {
-                                text: "20日 " + pct(modelData.ret20) + " / 60日 " + pct(modelData.ret60) + " / 波动 " + Number(modelData.stdScore || 0).toFixed(4) + " / CV " + Number(modelData.cvScore || 0).toFixed(3)
+                                text: "因子：20日 " + pct(modelData.ret20) + " / 60日 " + pct(modelData.ret60) + " / 波动 " + Number(modelData.stdScore || 0).toFixed(4) + " / 成交额CV " + Number(modelData.cvScore || 0).toFixed(3)
                                 color: "#7890a8"
                                 font.pixelSize: 11
                                 Layout.fillWidth: true

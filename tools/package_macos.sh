@@ -40,4 +40,12 @@ fi
 codesign --force --sign - "${DEST_APP}/Contents/MacOS/MyQuant" >/dev/null 2>&1
 codesign --force --sign - "${DEST_APP}" >/dev/null 2>&1
 codesign --verify --deep --strict --verbose=1 "${DEST_APP}"
+
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [[ -x "${LSREGISTER}" ]]; then
+    "${LSREGISTER}" -u "${SOURCE_APP}" >/dev/null 2>&1 || true
+    "${LSREGISTER}" -u "${DEST_DIR}/MyQuant.app" >/dev/null 2>&1 || true
+    "${LSREGISTER}" -f "${DEST_APP}" >/dev/null 2>&1 || true
+fi
+
 echo "${DEST_APP}"

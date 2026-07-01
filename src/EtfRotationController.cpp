@@ -1328,6 +1328,39 @@ QVariantMap EtfRotationController::runBacktest(QList<Bar> bars, const QString& s
         }
     }
 
+    const QString endPriceDate = dates.last();
+    const double endCash = cash;
+    const double endEquity = endNav;
+    double backtestHoldingValue = 0.0;
+    double backtestPnl = 0.0;
+    QVariantList backtestHoldings;
+    QStringList endCodes = positions.keys();
+    std::sort(endCodes.begin(), endCodes.end());
+    for (const QString& code : endCodes) {
+        const SimPosition pos = positions.value(code);
+        const double lastClose = closeAt(code, endPriceDate);
+        if (pos.shares <= 0.0 || lastClose <= 0.0)
+            continue;
+        const double marketValue = pos.shares * lastClose;
+        const double costValue = std::isfinite(pos.buyPrice) ? pos.shares * pos.buyPrice : 0.0;
+        const double pnl = costValue > 0.0 ? marketValue - costValue : 0.0;
+        backtestHoldingValue += marketValue;
+        backtestPnl += pnl;
+        backtestHoldings.append(QVariantMap{
+            {"symbol", displayCode(code)},
+            {"name", nameByCode.value(code, code)},
+            {"shares", pos.shares},
+            {"costPrice", std::isfinite(pos.buyPrice) ? pos.buyPrice : 0.0},
+            {"lastPrice", lastClose},
+            {"marketValue", marketValue},
+            {"pnl", pnl},
+            {"pnlRate", costValue > 0.0 ? pnl / costValue : 0.0},
+            {"weight", endEquity > 0.0 ? marketValue / endEquity : 0.0},
+            {"buyDate", prettyDate(pos.buyDate)},
+            {"date", prettyDate(endPriceDate)},
+        });
+    }
+
     const QString latestDate = factorByDateCode.lastKey();
     const QHash<QString, Bar> latestBars = factorByDateCode.value(latestDate);
     const QStringList latestWinners = selectWinners(latestBars);
@@ -1354,7 +1387,7 @@ QVariantMap EtfRotationController::runBacktest(QList<Bar> bars, const QString& s
         });
     }
 
-    const QVariantMap outMetrics{
+    QVariantMap outMetrics{
         {"startDate", outEquity.first().toMap().value("date")},
         {"endDate", outEquity.last().toMap().value("date")},
         {"cumulativeReturn", totalReturn},
@@ -1373,14 +1406,83 @@ QVariantMap EtfRotationController::runBacktest(QList<Bar> bars, const QString& s
         {"rebalanceCount", rebalanceCount},
         {"riskHalfCount", riskHalfCount},
         {"stopCount", stopCount},
+        {"backtestCash", endCash},
+        {"backtestHoldingValue", backtestHoldingValue},
+        {"backtestEquity", endEquity},
+        {"backtestPnl", backtestPnl},
     };
+    double realHoldingValue = 0.0;
+    double realPnl = 0.0;
+    const QVariantList realHoldings = buildRealHoldings(latestBars, &realHoldingValue, &realPnl);
+    outMetrics.insert("realCash", std::max(0.0, portfolio_.value("availableCash").toDouble()));
+    outMetrics.insert("realHoldingValue", realHoldingValue);
+    outMetrics.insert("realPnl", realPnl);
+    outMetrics.insert("realTotalAssets", outMetrics.value("realCash").toDouble() + realHoldingValue);
     return {{"metrics", outMetrics},
             {"equity", outEquity},
             {"trades", outTrades},
             {"rankings", outSignals},
             {"pricePoints", buildPricePoints(outTrades)},
             {"tradeCharts", buildTradeCharts(byCode, outTrades, startDate, endDate)},
+            {"backtestHoldings", backtestHoldings},
+            {"realHoldings", realHoldings},
             {"advice", buildAdvice(outSignals, latestBars, targetCashRatio, holdNum)}};
+}
+
+QVariantList EtfRotationController::buildRealHoldings(const QHash<QString, Bar>& latestBars, double* totalValue,
+                                                      double* totalPnl) const {
+    QVariantList out;
+    if (totalValue)
+        *totalValue = 0.0;
+    if (totalPnl)
+        *totalPnl = 0.0;
+
+    const QVariantList positions = portfolio_.value("positions").toList();
+    for (const QVariant& value : positions) {
+        const QVariantMap row = value.toMap();
+        if (!row.value("enabled", true).toBool())
+            continue;
+        const QString code = normalizeCode(row.value("code").toString());
+        const double shares = row.value("shares").toDouble();
+        if (code.isEmpty() || shares <= 0.0)
+            continue;
+
+        const Bar bar = latestBars.value(code);
+        const double lastPrice = bar.close;
+        const double marketValue = lastPrice > 0.0 ? shares * lastPrice : 0.0;
+        const double costPrice = row.value("cost_price").toDouble();
+        const double costValue = costPrice > 0.0 ? shares * costPrice : 0.0;
+        const bool hasCost = costValue > 0.0;
+        const double pnl = hasCost ? marketValue - costValue : 0.0;
+        if (totalValue)
+            *totalValue += marketValue;
+        if (totalPnl && hasCost)
+            *totalPnl += pnl;
+
+        out.append(QVariantMap{
+            {"symbol", displayCode(code)},
+            {"name", row.value("name").toString()},
+            {"shares", shares},
+            {"costPrice", costPrice},
+            {"lastPrice", lastPrice},
+            {"marketValue", marketValue},
+            {"pnl", pnl},
+            {"pnlRate", hasCost ? pnl / costValue : 0.0},
+            {"hasCost", hasCost},
+            {"weight", 0.0},
+            {"date", prettyDate(bar.date)},
+        });
+    }
+
+    const double base = totalValue ? *totalValue : 0.0;
+    if (base > 0.0) {
+        for (QVariant& value : out) {
+            QVariantMap row = value.toMap();
+            row.insert("weight", row.value("marketValue").toDouble() / base);
+            value = row;
+        }
+    }
+    return out;
 }
 
 QVariantList EtfRotationController::buildAdvice(const QVariantList& rankings, const QHash<QString, Bar>& latestBars,
@@ -1709,6 +1811,8 @@ bool EtfRotationController::runDefault(bool updateData, const QString& startDate
         advice_.clear();
         pricePoints_.clear();
         tradeCharts_.clear();
+        backtestHoldings_.clear();
+        realHoldings_.clear();
         reportMarkdown_.clear();
         summary_.clear();
         summary_.insert("headline", dataIssues_.isEmpty() ? "运行未完成" : "数据质量需要先修复");
@@ -1780,6 +1884,8 @@ bool EtfRotationController::runDefault(bool updateData, const QString& startDate
     advice_ = result.value("advice").toList();
     pricePoints_ = result.value("pricePoints").toList();
     tradeCharts_ = result.value("tradeCharts").toList();
+    backtestHoldings_ = result.value("backtestHoldings").toList();
+    realHoldings_ = result.value("realHoldings").toList();
     summary_ = buildSummary(metrics_, rankings_, advice_, dataIssues_);
     reportMarkdown_ = QString("# ETF 轮动复盘\n\n"
                               "- 区间：%1 至 %2\n"

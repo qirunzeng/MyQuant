@@ -17,6 +17,8 @@ class EtfRotationController : public QObject {
     Q_PROPERTY(QVariantList advice READ advice NOTIFY resultChanged)
     Q_PROPERTY(QVariantList pricePoints READ pricePoints NOTIFY resultChanged)
     Q_PROPERTY(QVariantList tradeCharts READ tradeCharts NOTIFY resultChanged)
+    Q_PROPERTY(QVariantList backtestHoldings READ backtestHoldings NOTIFY resultChanged)
+    Q_PROPERTY(QVariantList realHoldings READ realHoldings NOTIFY resultChanged)
     Q_PROPERTY(QVariantList dataIssues READ dataIssues NOTIFY resultChanged)
     Q_PROPERTY(QVariantMap summary READ summary NOTIFY resultChanged)
     Q_PROPERTY(QVariantList universe READ universe NOTIFY universeChanged)
@@ -35,6 +37,8 @@ public:
     QVariantList advice() const { return advice_; }
     QVariantList pricePoints() const { return pricePoints_; }
     QVariantList tradeCharts() const { return tradeCharts_; }
+    QVariantList backtestHoldings() const { return backtestHoldings_; }
+    QVariantList realHoldings() const { return realHoldings_; }
     QVariantList dataIssues() const { return dataIssues_; }
     QVariantMap summary() const { return summary_; }
     QVariantList universe() const { return universe_; }
@@ -98,6 +102,8 @@ private:
                             double stopLossRate, double initialCapital);
     QVariantList buildAdvice(const QVariantList& rankings, const QHash<QString, Bar>& latestBars,
                              double targetCashRatio, int holdNum) const;
+    QVariantList buildRealHoldings(const QHash<QString, Bar>& latestBars, double* totalValue,
+                                   double* totalPnl) const;
     QVariantList buildPricePoints(const QVariantList& trades) const;
     QVariantList buildTradeCharts(const QHash<QString, QVector<Bar>>& byCode, const QVariantList& trades,
                                   const QString& startDate, const QString& endDate) const;
@@ -116,6 +122,8 @@ private:
     QVariantList advice_;
     QVariantList pricePoints_;
     QVariantList tradeCharts_;
+    QVariantList backtestHoldings_;
+    QVariantList realHoldings_;
     QVariantList dataIssues_;
     QVariantMap summary_;
     QVariantList universe_;
