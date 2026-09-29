@@ -4,10 +4,10 @@ Canvas {
     id: root
     property var series: []
     property var trades: []
-    property color lineColor: "#38bdf8"
+    property color lineColor: AppTheme.accent
     property color buyColor: "#22c55e"
     property color sellColor: "#ef4444"
-    property color gridColor: "#273545"
+    property color gridColor: AppTheme.border
     property int viewStartIndex: 0
     property int viewEndIndex: Math.max(0, series.length - 1)
     property int hoverIndex: -1
@@ -112,7 +112,7 @@ Canvas {
         var ctx = getContext("2d")
         ctx.reset()
         ctx.clearRect(0, 0, width, height)
-        ctx.fillStyle = "#0b1117"
+        ctx.fillStyle = AppTheme.surface
         ctx.fillRect(0, 0, width, height)
 
         var r = plotRect()
@@ -209,7 +209,7 @@ Canvas {
         }
         hoverTradeIndex = closestTrade
 
-        ctx.fillStyle = "#7890a8"
+        ctx.fillStyle = AppTheme.textFaint
         ctx.font = "10px sans-serif"
         ctx.fillText(Number(minV).toFixed(2), r.left, height - 5)
         ctx.fillText(Number(maxV).toFixed(2), r.left, 10)
@@ -220,7 +220,7 @@ Canvas {
             if (isFinite(hv)) {
                 var hx = xAt(hoverIndex)
                 var hy = yAt(hv)
-                ctx.strokeStyle = "#64748b"
+                ctx.strokeStyle = AppTheme.textFaint
                 ctx.setLineDash([4, 4])
                 ctx.beginPath()
                 ctx.moveTo(hx, r.top)
@@ -240,14 +240,14 @@ Canvas {
                 var tw = Math.min(width - 16, Math.max(150, ctx.measureText(tip).width + 18))
                 var tx2 = Math.max(6, Math.min(width - tw - 6, hx + 10))
                 var ty2 = Math.max(6, hy - 32)
-                ctx.fillStyle = "#101b26"
-                ctx.strokeStyle = "#334155"
+                ctx.fillStyle = AppTheme.surface
+                ctx.strokeStyle = AppTheme.border
                 ctx.lineWidth = 1
                 ctx.beginPath()
                 ctx.rect(tx2, ty2, tw, 24)
                 ctx.fill()
                 ctx.stroke()
-                ctx.fillStyle = "#e8eef7"
+                ctx.fillStyle = AppTheme.text
                 ctx.textAlign = "left"
                 ctx.fillText(tip, tx2 + 9, ty2 + 16)
             }

@@ -4,6 +4,7 @@
 
 # Build outputs
 build/
+dist/
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt

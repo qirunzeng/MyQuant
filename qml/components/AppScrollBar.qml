@@ -13,7 +13,7 @@ ScrollBar {
         implicitWidth: root.orientation === Qt.Vertical ? 10 : 40
         implicitHeight: root.orientation === Qt.Horizontal ? 10 : 40
         radius: 5
-        color: root.pressed ? "#38bdf8" : root.hovered ? "#60a5fa" : "#4b657d"
+        color: root.pressed ? AppTheme.accent : root.hovered ? AppTheme.accent : AppTheme.textFaint
         opacity: root.size < 0.99 ? 0.9 : 0.35
     }
 
@@ -21,7 +21,7 @@ ScrollBar {
         implicitWidth: root.orientation === Qt.Vertical ? 10 : 40
         implicitHeight: root.orientation === Qt.Horizontal ? 10 : 40
         radius: 5
-        color: "#0a1118"
+        color: AppTheme.surfaceAlt
         opacity: root.size < 0.99 ? 0.55 : 0.25
     }
 }

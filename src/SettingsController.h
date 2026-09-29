@@ -12,6 +12,7 @@ class SettingsController : public QObject {
     Q_PROPERTY(QString llmApiKey READ llmApiKey WRITE setLlmApiKey NOTIFY settingsChanged)
     Q_PROPERTY(QString llmModel READ llmModel WRITE setLlmModel NOTIFY settingsChanged)
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY settingsChanged)
+    Q_PROPERTY(QVariantMap feeSettings READ feeSettings WRITE setFeeSettings NOTIFY settingsChanged)
     Q_PROPERTY(QString dataRoot READ dataRoot CONSTANT)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
 
@@ -24,6 +25,7 @@ public:
     QString llmApiKey() const { return llmApiKey_; }
     QString llmModel() const { return llmModel_; }
     QString theme() const { return theme_; }
+    QVariantMap feeSettings() const { return feeSettings_; }
     QString dataRoot() const;
     QString statusMessage() const { return statusMessage_; }
 
@@ -33,6 +35,7 @@ public:
     void setLlmApiKey(const QString& value);
     void setLlmModel(const QString& value);
     void setTheme(const QString& value);
+    void setFeeSettings(const QVariantMap& value);
 
     Q_INVOKABLE void load();
     Q_INVOKABLE bool save();
@@ -54,6 +57,11 @@ private:
     QString llmBaseUrl_;
     QString llmApiKey_;
     QString llmModel_ = "gpt-4.1-mini";
-    QString theme_ = "dark";
+    QString theme_ = "light";
+    QVariantMap feeSettings_{{"aStockRate", 0.741}, {"aStockMinimum", 0.3},
+                             {"aEtfRate", 0.5}, {"aEtfMinimum", 0.1},
+                             {"aSellStampRate", 5.0},
+                             {"hkRate", 11.27}, {"hkMinimum", 0.0},
+                             {"usRate", 0.0}, {"usMinimum", 0.0}};
     QString statusMessage_;
 };

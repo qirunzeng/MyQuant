@@ -81,9 +81,28 @@ void SettingsController::setLlmModel(const QString& value) {
 }
 
 void SettingsController::setTheme(const QString& value) {
-    if (theme_ == value)
+    const QString normalized = value == "dark" ? "dark" : "light";
+    if (theme_ == normalized)
         return;
-    theme_ = value.trimmed().isEmpty() ? "dark" : value.trimmed();
+    theme_ = normalized;
+    emit settingsChanged();
+}
+
+void SettingsController::setFeeSettings(const QVariantMap& value) {
+    QVariantMap normalized = feeSettings_;
+    const QStringList keys{"aStockRate", "aStockMinimum", "aEtfRate", "aEtfMinimum",
+                           "aSellStampRate", "hkRate", "hkMinimum", "usRate", "usMinimum"};
+    for (const QString& key : keys) {
+        bool ok = false;
+        const double number = value.value(key).toString().trimmed().toDouble(&ok);
+        if (ok)
+            normalized[key] = qMax(0.0, number);
+        else if (value.value(key).canConvert<double>())
+            normalized[key] = qMax(0.0, value.value(key).toDouble());
+    }
+    if (feeSettings_ == normalized)
+        return;
+    feeSettings_ = normalized;
     emit settingsChanged();
 }
 
@@ -99,6 +118,11 @@ void SettingsController::load() {
         llmApiKey_ = obj.value("llmApiKey").toString(llmApiKey_);
         llmModel_ = obj.value("llmModel").toString(llmModel_);
         theme_ = obj.value("theme").toString(theme_);
+        const QJsonObject fees = obj.value("feeSettings").toObject();
+        if (!fees.isEmpty())
+            setFeeSettings(fees.toVariantMap());
+        if (theme_ != "light" && theme_ != "dark")
+            theme_ = "light";
     }
     setStatus("设置已载入");
     emit settingsChanged();
@@ -118,6 +142,7 @@ bool SettingsController::save() {
         {"llmApiKey", llmApiKey_},
         {"llmModel", llmModel_},
         {"theme", theme_},
+        {"feeSettings", QJsonObject::fromVariantMap(feeSettings_)},
         {"savedAt", QDateTime::currentDateTime().toString(Qt::ISODate)},
     };
     file.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
@@ -147,6 +172,7 @@ QVariantMap SettingsController::asMap() const {
         {"llmApiKey", llmApiKey_},
         {"llmModel", llmModel_},
         {"theme", theme_},
+        {"feeSettings", feeSettings_},
         {"dataRoot", AppPaths::root()},
     };
 }

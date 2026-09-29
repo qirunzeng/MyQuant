@@ -46,8 +46,8 @@ Item {
     function pnlColor(v) {
         var n = Number(v)
         if (!isFinite(n) || Math.abs(n) < 0.000001)
-            return "#cbd5e1"
-        return n > 0 ? "#86efac" : "#fca5a5"
+            return AppTheme.text
+        return n > 0 ? AppTheme.positive : AppTheme.negative
     }
 
     function scoreText(v) {
@@ -244,19 +244,19 @@ Item {
             return "#1d4ed8"
         if (action === "WAIT")
             return "#854d0e"
-        return "#334155"
+        return AppTheme.border
     }
 
     function actionFg(action) {
         if (action === "BUY")
-            return "#86efac"
+            return AppTheme.positive
         if (action === "SELL")
-            return "#fca5a5"
+            return AppTheme.negative
         if (action === "HOLD")
             return "#bfdbfe"
         if (action === "WAIT")
             return "#fde68a"
-        return "#cbd5e1"
+        return AppTheme.text
     }
 
     function reloadPortfolio() {
@@ -377,13 +377,13 @@ Item {
                     spacing: 4
                     Label {
                         text: "ETF 轮动复盘台"
-                        color: "#eef6ff"
+                        color: AppTheme.text
                         font.pixelSize: 24
                         font.bold: true
                     }
                     Label {
                         text: "20 日回归动量、10 日复核、现金缓冲和单标的止损。"
-                        color: "#8fa4ba"
+                        color: AppTheme.textMuted
                         font.pixelSize: 13
                     }
                 }
@@ -416,12 +416,12 @@ Item {
                 currentIndex: page.activeEtfTab
                 onCurrentIndexChanged: page.activeEtfTab = currentIndex
 
-                TabButton { text: "运行配置" }
-                TabButton { text: "回测数据" }
-                TabButton { text: "ETF 池" }
-                TabButton { text: "操作建议" }
-                TabButton { text: "图表" }
-                TabButton { text: "交易" }
+                AppTabButton { text: "运行配置" }
+                AppTabButton { text: "回测数据" }
+                AppTabButton { text: "ETF 池" }
+                AppTabButton { text: "操作建议" }
+                AppTabButton { text: "图表" }
+                AppTabButton { text: "交易" }
             }
 
             SectionPanel {
@@ -444,21 +444,21 @@ Item {
                         columnSpacing: 10
                         rowSpacing: 8
 
-                        Label { text: "开始日期"; color: "#92a6bc" }
+                        Label { text: "开始日期"; color: AppTheme.textMuted }
                         TextField { id: startEdit; text: "20210101"; placeholderText: "YYYYMMDD"; Layout.preferredWidth: 118 }
-                        Label { text: "结束日期"; color: "#92a6bc" }
+                        Label { text: "结束日期"; color: AppTheme.textMuted }
                         TextField { id: endEdit; placeholderText: "留空=上一完整交易日"; Layout.preferredWidth: 150 }
-                        Label { text: "持有数"; color: "#92a6bc" }
+                        Label { text: "持有数"; color: AppTheme.textMuted }
                         SpinBox { id: holdSpin; from: 1; to: 8; value: 4; Layout.preferredWidth: 110 }
 
-                        Label { text: "现金比例"; color: "#92a6bc" }
+                        Label { text: "现金比例"; color: AppTheme.textMuted }
                         TextField { id: cashEdit; text: "0.25"; Layout.preferredWidth: 118 }
-                        Label { text: "止损"; color: "#92a6bc" }
+                        Label { text: "止损"; color: AppTheme.textMuted }
                         TextField { id: stopEdit; text: "0.07"; Layout.preferredWidth: 150 }
-                        Label { text: "回测本金"; color: "#92a6bc" }
+                        Label { text: "回测本金"; color: AppTheme.textMuted }
                         TextField { id: capitalEdit; text: "40000"; Layout.preferredWidth: 110 }
 
-                        Label { text: "可用现金"; color: "#92a6bc" }
+                        Label { text: "可用现金"; color: AppTheme.textMuted }
                         TextField {
                             text: page.availableCashText
                             Layout.preferredWidth: 118
@@ -469,17 +469,17 @@ Item {
                             Layout.preferredWidth: 150
                             onClicked: page.saveRunConfig()
                         }
-                        Label { text: "数据补齐"; color: "#92a6bc" }
+                        Label { text: "数据补齐"; color: AppTheme.textMuted }
                         Label {
                             text: "自动判断缓存缺口，必要时调用 AkShare"
-                            color: "#92a6bc"
+                            color: AppTheme.textMuted
                             wrapMode: Text.WordWrap
                             Layout.columnSpan: 2
                             Layout.fillWidth: true
                         }
                         Label {
                             text: etfController.statusMessage
-                            color: "#7dd3fc"
+                            color: AppTheme.accent
                             elide: Text.ElideRight
                             Layout.columnSpan: 6
                             Layout.fillWidth: true
@@ -493,7 +493,7 @@ Item {
 
                         Label {
                             text: "运行时先检查本地 qfq 缓存；缺少预热或结束日期才调用设置里的 Python/AkShare 补齐。"
-                            color: "#8fa4ba"
+                            color: AppTheme.textMuted
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -516,7 +516,7 @@ Item {
 
                     Label {
                         text: etfController.summary.headline || "等待运行"
-                        color: "#e8eef7"
+                        color: AppTheme.text
                         font.pixelSize: 22
                         font.bold: true
                         Layout.fillWidth: true
@@ -524,18 +524,18 @@ Item {
                     }
                     Label {
                         text: etfController.summary.conclusion || "运行后显示目标组合、持仓动作和数据状态。"
-                        color: "#9fb2c7"
+                        color: AppTheme.textMuted
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: "BUY " + (etfController.summary.buyCount || 0); color: "#86efac" }
-                        Label { text: "SELL " + (etfController.summary.sellCount || 0); color: "#fca5a5" }
+                        Label { text: "BUY " + (etfController.summary.buyCount || 0); color: AppTheme.positive }
+                        Label { text: "SELL " + (etfController.summary.sellCount || 0); color: AppTheme.negative }
                         Label { text: "HOLD " + (etfController.summary.holdCount || 0); color: "#93c5fd" }
-                        Label { text: "WAIT " + (etfController.summary.waitCount || 0); color: "#cbd5e1" }
+                        Label { text: "WAIT " + (etfController.summary.waitCount || 0); color: AppTheme.text }
                         Item { Layout.fillWidth: true }
-                        Label { text: etfController.summary.period || ""; color: "#64748b" }
+                        Label { text: etfController.summary.period || ""; color: AppTheme.textFaint }
                     }
                 }
 
@@ -547,7 +547,7 @@ Item {
                     Label {
                         visible: etfController.dataIssues.length === 0
                         text: "未发现超过阈值的单日跳变。若行情源刚更新，仍建议关注 qfq 数据是否完整。"
-                        color: "#8fa4ba"
+                        color: AppTheme.textMuted
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -570,9 +570,9 @@ Item {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
-                                Label { text: modelData.date || "--"; color: "#fca5a5"; Layout.preferredWidth: 86 }
-                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#e8eef7"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: pct(modelData.return); color: "#fca5a5"; Layout.preferredWidth: 72; horizontalAlignment: Text.AlignRight }
+                                Label { text: modelData.date || "--"; color: AppTheme.negative; Layout.preferredWidth: 86 }
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: AppTheme.text; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: pct(modelData.return); color: AppTheme.negative; Layout.preferredWidth: 72; horizontalAlignment: Text.AlignRight }
                             }
                         }
                     }
@@ -605,7 +605,7 @@ Item {
                         Item { Layout.fillWidth: true }
                         Label {
                             text: "开关控制回测 ETF 池；资产分类、份额和成本在这里统一维护。可用现金在运行配置页设置。"
-                            color: "#8fa4ba"
+                            color: AppTheme.textMuted
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -649,19 +649,19 @@ Item {
                                 width: page.portfolioTableWidth
                                 height: 30
 
-                                Label { x: page.columnX("enabled"); width: page.enabledColumnWidth; text: "启用"; color: "#6f8499"; font.pixelSize: 11; elide: Text.ElideRight }
-                                Label { x: page.columnX("code"); width: page.codeColumnWidth; text: "代码"; color: "#6f8499"; font.pixelSize: 11; elide: Text.ElideRight }
-                                Label { x: page.columnX("name"); width: page.nameColumnWidth; text: "名称"; color: "#6f8499"; font.pixelSize: 11; elide: Text.ElideRight }
-                                Label { x: page.columnX("asset"); width: page.assetColumnWidth; text: "资产分类"; color: "#6f8499"; font.pixelSize: 11; elide: Text.ElideRight }
-                                Label { x: page.columnX("shares"); width: page.sharesColumnWidth; text: "份额"; color: "#6f8499"; font.pixelSize: 11; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
-                                Label { x: page.columnX("cost"); width: page.costColumnWidth; text: "成本"; color: "#6f8499"; font.pixelSize: 11; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
-                                Label { x: page.columnX("delete"); width: page.deleteColumnWidth; text: "操作"; color: "#6f8499"; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
+                                Label { x: page.columnX("enabled"); width: page.enabledColumnWidth; text: "启用"; color: AppTheme.textFaint; font.pixelSize: 11; elide: Text.ElideRight }
+                                Label { x: page.columnX("code"); width: page.codeColumnWidth; text: "代码"; color: AppTheme.textFaint; font.pixelSize: 11; elide: Text.ElideRight }
+                                Label { x: page.columnX("name"); width: page.nameColumnWidth; text: "名称"; color: AppTheme.textFaint; font.pixelSize: 11; elide: Text.ElideRight }
+                                Label { x: page.columnX("asset"); width: page.assetColumnWidth; text: "资产分类"; color: AppTheme.textFaint; font.pixelSize: 11; elide: Text.ElideRight }
+                                Label { x: page.columnX("shares"); width: page.sharesColumnWidth; text: "份额"; color: AppTheme.textFaint; font.pixelSize: 11; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+                                Label { x: page.columnX("cost"); width: page.costColumnWidth; text: "成本"; color: AppTheme.textFaint; font.pixelSize: 11; horizontalAlignment: Text.AlignRight; elide: Text.ElideRight }
+                                Label { x: page.columnX("delete"); width: page.deleteColumnWidth; text: "操作"; color: AppTheme.textFaint; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
 
                                 Rectangle {
                                     x: page.columnX("enabled") + page.enabledColumnWidth + page.columnGap / 2 - 1
                                     width: 1
                                     height: parent.height
-                                    color: "#2a3a4c"
+                                    color: AppTheme.border
                                     MouseArea {
                                         anchors.centerIn: parent
                                         width: 12
@@ -675,7 +675,7 @@ Item {
                                     x: page.columnX("code") + page.codeColumnWidth + page.columnGap / 2 - 1
                                     width: 1
                                     height: parent.height
-                                    color: "#2a3a4c"
+                                    color: AppTheme.border
                                     MouseArea {
                                         anchors.centerIn: parent
                                         width: 12
@@ -689,7 +689,7 @@ Item {
                                     x: page.columnX("name") + page.nameColumnWidth + page.columnGap / 2 - 1
                                     width: 1
                                     height: parent.height
-                                    color: "#2a3a4c"
+                                    color: AppTheme.border
                                     MouseArea {
                                         anchors.centerIn: parent
                                         width: 12
@@ -703,7 +703,7 @@ Item {
                                     x: page.columnX("asset") + page.assetColumnWidth + page.columnGap / 2 - 1
                                     width: 1
                                     height: parent.height
-                                    color: "#2a3a4c"
+                                    color: AppTheme.border
                                     MouseArea {
                                         anchors.centerIn: parent
                                         width: 12
@@ -717,7 +717,7 @@ Item {
                                     x: page.columnX("shares") + page.sharesColumnWidth + page.columnGap / 2 - 1
                                     width: 1
                                     height: parent.height
-                                    color: "#2a3a4c"
+                                    color: AppTheme.border
                                     MouseArea {
                                         anchors.centerIn: parent
                                         width: 12
@@ -745,6 +745,11 @@ Item {
                                 delegate: Item {
                                     width: page.portfolioTableWidth
                                     height: 38
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: index % 2 === 0 ? AppTheme.surface : AppTheme.surfaceAlt
+                                        z: -1
+                                    }
                                     Switch {
                                         x: page.columnX("enabled")
                                         width: page.enabledColumnWidth
@@ -797,11 +802,12 @@ Item {
                                         horizontalAlignment: Text.AlignRight
                                         onEditingFinished: page.updatePortfolioRow(index, "cost_price", Number(text))
                                     }
-                                    Button {
+                                    AppRowButton {
                                         x: page.columnX("delete")
                                         width: page.deleteColumnWidth
                                         height: 36
                                         text: "删除"
+                                        alternateRow: index % 2 === 1
                                         onClicked: page.removePortfolioRow(index)
                                     }
                                 }
@@ -819,7 +825,7 @@ Item {
                     Label {
                         visible: page.filteredAdvice().length === 0
                         text: "暂无操作建议。运行 ETF 轮动后，这里会按 ETF 池启用标的、可用现金和真实持仓快照生成买入、卖出、持有与等待动作。"
-                        color: "#8fa4ba"
+                        color: AppTheme.textMuted
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -838,7 +844,7 @@ Item {
                         delegate: Rectangle {
                             width: Math.max(1, ListView.view.width - page.scrollBarGutter)
                             height: 104
-                            color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                            color: index % 2 === 0 ? AppTheme.surfaceAlt : AppTheme.surface
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 16
@@ -873,7 +879,7 @@ Item {
                                     spacing: 6
                                     Label {
                                         text: (modelData.name || "现金") + (modelData.symbol ? "  " + modelData.symbol : "")
-                                        color: "#dbe7f4"
+                                        color: AppTheme.text
                                         font.pixelSize: 17
                                         font.bold: true
                                         elide: Text.ElideRight
@@ -881,7 +887,7 @@ Item {
                                     }
                                     Label {
                                         text: page.adviceDetail(modelData)
-                                        color: "#8fa4ba"
+                                        color: AppTheme.textMuted
                                         font.pixelSize: 13
                                         wrapMode: Text.WordWrap
                                         maximumLineCount: 2
@@ -910,7 +916,7 @@ Item {
                 Layout.rightMargin: 18
                 spacing: 10
                 MetricCard { label: "累计收益"; value: pct(etfController.metrics.cumulativeReturn); hint: etfController.metrics.startDate + " / " + etfController.metrics.endDate; accent: "#22c55e" }
-                MetricCard { label: "年化收益"; value: pct(etfController.metrics.annualizedReturn); hint: "annualized"; accent: "#38bdf8" }
+                MetricCard { label: "年化收益"; value: pct(etfController.metrics.annualizedReturn); hint: "annualized"; accent: AppTheme.accent }
                 MetricCard { label: "最大回撤"; value: pct(etfController.metrics.maxDrawdown); hint: "drawdown"; accent: "#f97316" }
                 MetricCard { label: "Calmar"; value: money(etfController.metrics.calmarRatio); hint: "return / drawdown"; accent: "#a78bfa" }
                 MetricCard { label: "平均现金"; value: pct(etfController.metrics.averageCashRatio); hint: "cash buffer"; accent: "#facc15" }
@@ -923,8 +929,8 @@ Item {
                 Layout.rightMargin: 18
                 spacing: 10
                 MetricCard { label: "最低现金"; value: pct(etfController.metrics.minCashRatioObserved); hint: "min observed"; accent: "#14b8a6" }
-                MetricCard { label: "最差月"; value: pct(etfController.metrics.worstMonthlyReturn); hint: "monthly"; accent: "#fb7185" }
-                MetricCard { label: "最佳月"; value: pct(etfController.metrics.bestMonthlyReturn); hint: "monthly"; accent: "#34d399" }
+                MetricCard { label: "最差月"; value: pct(etfController.metrics.worstMonthlyReturn); hint: "monthly"; accent: AppTheme.negative }
+                MetricCard { label: "最佳月"; value: pct(etfController.metrics.bestMonthlyReturn); hint: "monthly"; accent: AppTheme.positive }
                 MetricCard { label: "回撤修复"; value: (etfController.metrics.recoveryDaysAfterMaxDrawdown || 0) + " 天"; hint: "after max dd"; accent: "#60a5fa" }
                 MetricCard { label: "风险动作"; value: (etfController.metrics.riskHalfCount || 0) + " / " + (etfController.metrics.stopCount || 0); hint: "半仓 / 止损"; accent: "#f59e0b" }
             }
@@ -944,16 +950,16 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: "持仓 " + money(etfController.metrics.backtestHoldingValue); color: "#7dd3fc"; font.bold: true }
-                        Label { text: "现金 " + money(etfController.metrics.backtestCash); color: "#8fa4ba" }
+                        Label { text: "持仓 " + money(etfController.metrics.backtestHoldingValue); color: AppTheme.accent; font.bold: true }
+                        Label { text: "现金 " + money(etfController.metrics.backtestCash); color: AppTheme.textMuted }
                         Item { Layout.fillWidth: true }
-                        Label { text: "权益 " + money(etfController.metrics.backtestEquity); color: "#e8eef7"; font.bold: true }
+                        Label { text: "权益 " + money(etfController.metrics.backtestEquity); color: AppTheme.text; font.bold: true }
                     }
 
                     Label {
                         visible: etfController.backtestHoldings.length === 0
                         text: "运行回测后显示策略在结束日的模拟持仓、成本、末价、市值和浮盈亏。"
-                        color: "#8fa4ba"
+                        color: AppTheme.textMuted
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -969,30 +975,30 @@ Item {
                         header: Rectangle {
                             width: ListView.view ? ListView.view.width - page.scrollBarGutter : 1
                             height: 24
-                            color: "#0b1117"
+                            color: AppTheme.surface
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
-                                Label { text: "标的"; color: "#64748b"; Layout.fillWidth: true }
-                                Label { text: "份额"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: "末价"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: "市值"; color: "#64748b"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
-                                Label { text: "盈亏"; color: "#64748b"; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
+                                Label { text: "标的"; color: AppTheme.textFaint; Layout.fillWidth: true }
+                                Label { text: "份额"; color: AppTheme.textFaint; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "末价"; color: AppTheme.textFaint; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "市值"; color: AppTheme.textFaint; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: "盈亏"; color: AppTheme.textFaint; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
                             }
                         }
                         delegate: Rectangle {
                             width: Math.max(1, ListView.view.width - page.scrollBarGutter)
                             height: 34
-                            color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                            color: index % 2 === 0 ? AppTheme.surfaceAlt : AppTheme.surface
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
-                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: Number(modelData.shares || 0).toFixed(0); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: money(modelData.lastPrice); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: money(modelData.marketValue); color: "#cbd5e1"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: AppTheme.text; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: Number(modelData.shares || 0).toFixed(0); color: AppTheme.textMuted; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.lastPrice); color: AppTheme.textMuted; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.marketValue); color: AppTheme.text; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
                                 Label { text: signedMoney(modelData.pnl) + " / " + pct(modelData.pnlRate); color: page.pnlColor(modelData.pnl); Layout.preferredWidth: 112; horizontalAlignment: Text.AlignRight }
                             }
                         }
@@ -1006,8 +1012,8 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: "持仓 " + money(etfController.metrics.realHoldingValue); color: "#7dd3fc"; font.bold: true }
-                        Label { text: "现金 " + money(etfController.metrics.realCash); color: "#8fa4ba" }
+                        Label { text: "持仓 " + money(etfController.metrics.realHoldingValue); color: AppTheme.accent; font.bold: true }
+                        Label { text: "现金 " + money(etfController.metrics.realCash); color: AppTheme.textMuted }
                         Item { Layout.fillWidth: true }
                         Label { text: "浮盈亏 " + signedMoney(etfController.metrics.realPnl); color: page.pnlColor(etfController.metrics.realPnl); font.bold: true }
                     }
@@ -1015,7 +1021,7 @@ Item {
                     Label {
                         visible: etfController.realHoldings.length === 0
                         text: "在 ETF 池填写真实份额和成本价后，运行回测会用最新 qfq 收盘价估算真实持仓浮盈亏。"
-                        color: "#8fa4ba"
+                        color: AppTheme.textMuted
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -1031,31 +1037,31 @@ Item {
                         header: Rectangle {
                             width: ListView.view ? ListView.view.width - page.scrollBarGutter : 1
                             height: 24
-                            color: "#0b1117"
+                            color: AppTheme.surface
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
-                                Label { text: "标的"; color: "#64748b"; Layout.fillWidth: true }
-                                Label { text: "成本"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: "最新"; color: "#64748b"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: "市值"; color: "#64748b"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
-                                Label { text: "盈亏"; color: "#64748b"; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
+                                Label { text: "标的"; color: AppTheme.textFaint; Layout.fillWidth: true }
+                                Label { text: "成本"; color: AppTheme.textFaint; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "最新"; color: AppTheme.textFaint; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: "市值"; color: AppTheme.textFaint; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: "盈亏"; color: AppTheme.textFaint; Layout.preferredWidth: 78; horizontalAlignment: Text.AlignRight }
                             }
                         }
                         delegate: Rectangle {
                             width: Math.max(1, ListView.view.width - page.scrollBarGutter)
                             height: 34
-                            color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                            color: index % 2 === 0 ? AppTheme.surfaceAlt : AppTheme.surface
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
                                 anchors.rightMargin: 8
-                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: modelData.hasCost ? money(modelData.costPrice) : "未填"; color: modelData.hasCost ? "#9fb2c7" : "#fbbf24"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: money(modelData.lastPrice); color: "#9fb2c7"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
-                                Label { text: money(modelData.marketValue); color: "#cbd5e1"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
-                                Label { text: modelData.hasCost ? signedMoney(modelData.pnl) + " / " + pct(modelData.pnlRate) : "--"; color: modelData.hasCost ? page.pnlColor(modelData.pnl) : "#64748b"; Layout.preferredWidth: 112; horizontalAlignment: Text.AlignRight }
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: AppTheme.text; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: modelData.hasCost ? money(modelData.costPrice) : "未填"; color: modelData.hasCost ? AppTheme.textMuted : "#fbbf24"; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.lastPrice); color: AppTheme.textMuted; Layout.preferredWidth: 58; horizontalAlignment: Text.AlignRight }
+                                Label { text: money(modelData.marketValue); color: AppTheme.text; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: modelData.hasCost ? signedMoney(modelData.pnl) + " / " + pct(modelData.pnlRate) : "--"; color: modelData.hasCost ? page.pnlColor(modelData.pnl) : AppTheme.textFaint; Layout.preferredWidth: 112; horizontalAlignment: Text.AlignRight }
                             }
                         }
                     }
@@ -1077,9 +1083,9 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Label { text: "累计增长 " + pct(etfController.metrics.cumulativeReturn); color: "#7dd3fc"; font.bold: true }
+                        Label { text: "累计增长 " + pct(etfController.metrics.cumulativeReturn); color: AppTheme.accent; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Label { text: "末值增长 " + growthFromNav(lastEquityValue("nav")); color: "#8fa4ba" }
+                        Label { text: "末值增长 " + growthFromNav(lastEquityValue("nav")); color: AppTheme.textMuted }
                     }
 
                     LineChart {
@@ -1087,7 +1093,7 @@ Item {
                         Layout.fillHeight: true
                         points: etfController.equity
                         valueRole: "nav"
-                        lineColor: "#38bdf8"
+                        lineColor: AppTheme.accent
                         formatMode: "growthPercent"
                         labelPrefix: "末值"
                     }
@@ -1102,7 +1108,7 @@ Item {
                         Layout.fillWidth: true
                         Label { text: "最大回撤 " + pct(etfController.metrics.maxDrawdown); color: "#fdba74"; font.bold: true }
                         Item { Layout.fillWidth: true }
-                        Label { text: "当前回撤 " + pct(lastEquityValue("drawdown")); color: "#8fa4ba" }
+                        Label { text: "当前回撤 " + pct(lastEquityValue("drawdown")); color: AppTheme.textMuted }
                     }
 
                     LineChart {
@@ -1138,7 +1144,7 @@ Item {
                     delegate: Rectangle {
                         width: Math.max(1, ListView.view.width - page.scrollBarGutter)
                         height: 52
-                        color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                        color: index % 2 === 0 ? AppTheme.surfaceAlt : AppTheme.surface
                         ColumnLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 8
@@ -1146,11 +1152,11 @@ Item {
                             spacing: 2
                             RowLayout {
                                 Layout.fillWidth: true
-                                Label { text: "#" + modelData.rank; color: "#64748b"; Layout.preferredWidth: 42 }
-                                Label { text: modelData.name + "  " + modelData.symbol; color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: "#" + modelData.rank; color: AppTheme.textFaint; Layout.preferredWidth: 42 }
+                                Label { text: modelData.name + "  " + modelData.symbol; color: AppTheme.text; Layout.fillWidth: true; elide: Text.ElideRight }
                                 Label {
                                     text: page.scoreText(modelData.score)
-                                    color: modelData.selected ? "#86efac" : "#94a3b8"
+                                    color: modelData.selected ? AppTheme.positive : "#94a3b8"
                                     Layout.preferredWidth: 124
                                     horizontalAlignment: Text.AlignRight
                                     elide: Text.ElideRight
@@ -1161,7 +1167,7 @@ Item {
                             }
                             Label {
                                 text: "因子：20日 " + pct(modelData.ret20) + " / 60日 " + pct(modelData.ret60) + " / 波动 " + Number(modelData.stdScore || 0).toFixed(4) + " / 成交额CV " + Number(modelData.cvScore || 0).toFixed(3)
-                                color: "#7890a8"
+                                color: AppTheme.textFaint
                                 font.pixelSize: 11
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
@@ -1182,7 +1188,7 @@ Item {
                 Label {
                     visible: etfController.tradeCharts.length === 0
                     text: "运行后会按每只 ETF 生成独立价格曲线，并标出 BUY / SELL 点位。"
-                    color: "#8fa4ba"
+                    color: AppTheme.textMuted
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -1229,8 +1235,8 @@ Item {
                                         width: Math.max(92, Math.min(150, tabText.implicitWidth + 22))
                                         height: 30
                                         radius: 6
-                                        color: active ? "#0e7490" : "#0c131a"
-                                        border.color: active ? "#22d3ee" : "#243241"
+                                        color: active ? AppTheme.accent : AppTheme.surfaceAlt
+                                        border.color: active ? AppTheme.accent : AppTheme.border
                                         border.width: 1
 
                                         Label {
@@ -1238,7 +1244,7 @@ Item {
                                             anchors.centerIn: parent
                                             width: parent.width - 14
                                             text: (modelData.name || "") + " " + (modelData.symbol || "")
-                                            color: active ? "#ecfeff" : "#9fb2c7"
+                                            color: active ? "#ecfeff" : AppTheme.textMuted
                                             font.pixelSize: 12
                                             font.bold: active
                                             elide: Text.ElideRight
@@ -1269,8 +1275,8 @@ Item {
                         Layout.fillHeight: true
                         clip: true
                         radius: 8
-                        color: "#0c131a"
-                        border.color: "#243241"
+                        color: AppTheme.surfaceAlt
+                        border.color: AppTheme.border
                         border.width: 1
 
                         ColumnLayout {
@@ -1282,20 +1288,20 @@ Item {
                                 Layout.fillWidth: true
                                 Label {
                                     text: (activeBsCard.chart.name || "") + "  " + (activeBsCard.chart.symbol || "")
-                                    color: "#e8eef7"
+                                    color: AppTheme.text
                                     font.bold: true
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
                                 }
                                 Label {
                                     text: (page.clampedTradeChartIndex() + 1) + " / " + page.tradeChartCount()
-                                    color: "#64748b"
+                                    color: AppTheme.textFaint
                                     Layout.preferredWidth: 54
                                     horizontalAlignment: Text.AlignRight
                                 }
                                 Label {
                                     text: "末值 " + money(activeBsCard.chart.lastClose)
-                                    color: "#8fa4ba"
+                                    color: AppTheme.textMuted
                                     Layout.preferredWidth: 112
                                     horizontalAlignment: Text.AlignRight
                                     elide: Text.ElideRight
@@ -1329,10 +1335,10 @@ Item {
                                         model: activeBsCard.chart.trades ? activeBsCard.chart.trades.slice(Math.max(0, activeBsCard.chart.trades.length - 3), activeBsCard.chart.trades.length) : []
                                         delegate: Row {
                                             spacing: 6
-                                            Label { text: modelData.date || "--"; color: "#7890a8" }
-                                            Label { text: modelData.side || ""; color: modelData.side === "BUY" ? "#86efac" : "#fca5a5"; font.bold: true }
-                                            Label { text: money(modelData.price); color: "#cbd5e1" }
-                                            Label { width: 96; text: modelData.reason || ""; color: "#7890a8"; elide: Text.ElideRight }
+                                            Label { text: modelData.date || "--"; color: AppTheme.textFaint }
+                                            Label { text: modelData.side || ""; color: modelData.side === "BUY" ? AppTheme.positive : AppTheme.negative; font.bold: true }
+                                            Label { text: money(modelData.price); color: AppTheme.text }
+                                            Label { width: 96; text: modelData.reason || ""; color: AppTheme.textFaint; elide: Text.ElideRight }
                                         }
                                     }
                                 }
@@ -1351,13 +1357,13 @@ Item {
                 Layout.preferredHeight: visible ? 142 : 0
                 Label {
                     text: "AkShare qfq 日线；20 日加权回归动量乘 R2；固定 10 个交易日复核；T 日信号、T+1 OHLC4 近似成交；目标现金 25%；单标的固定止损；高波动或成交额不稳定时半仓。"
-                    color: "#9fb2c7"
+                    color: AppTheme.textMuted
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
                 Label {
                     text: "开关控制回测 ETF 池；买入数量按 A 股 ETF 一手 100 份取整；单日跳变超过 20% 会被视为复权/分红异常候选并阻止回测。"
-                    color: "#8fa4ba"
+                    color: AppTheme.textMuted
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -1384,7 +1390,7 @@ Item {
                     delegate: Rectangle {
                         width: Math.max(1, ListView.view.width - page.scrollBarGutter)
                         height: 54
-                        color: index % 2 === 0 ? "#0c131a" : "#0f1720"
+                        color: index % 2 === 0 ? AppTheme.surfaceAlt : AppTheme.surface
                         ColumnLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 8
@@ -1392,18 +1398,18 @@ Item {
                             spacing: 2
                             RowLayout {
                                 Layout.fillWidth: true
-                                Label { text: modelData.date || "--"; color: "#8fa4ba"; Layout.preferredWidth: 88 }
-                                Label { text: "信号 " + (modelData.signalDate || "--"); color: "#64748b"; Layout.preferredWidth: 112 }
-                                Label { text: modelData.side || ""; color: modelData.side === "BUY" ? "#86efac" : "#fca5a5"; Layout.preferredWidth: 42 }
-                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: "#dbe7f4"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: money(modelData.price); color: "#cbd5e1"; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
-                                Label { text: Number(modelData.shares || 0).toFixed(0) + " 份"; color: "#cbd5e1"; Layout.preferredWidth: 76; horizontalAlignment: Text.AlignRight }
+                                Label { text: modelData.date || "--"; color: AppTheme.textMuted; Layout.preferredWidth: 88 }
+                                Label { text: "信号 " + (modelData.signalDate || "--"); color: AppTheme.textFaint; Layout.preferredWidth: 112 }
+                                Label { text: modelData.side || ""; color: modelData.side === "BUY" ? AppTheme.positive : AppTheme.negative; Layout.preferredWidth: 42 }
+                                Label { text: (modelData.name || "") + " " + (modelData.symbol || ""); color: AppTheme.text; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: money(modelData.price); color: AppTheme.text; Layout.preferredWidth: 74; horizontalAlignment: Text.AlignRight }
+                                Label { text: Number(modelData.shares || 0).toFixed(0) + " 份"; color: AppTheme.text; Layout.preferredWidth: 76; horizontalAlignment: Text.AlignRight }
                             }
                             RowLayout {
                                 Layout.fillWidth: true
-                                Label { text: modelData.reason || ""; color: "#7890a8"; Layout.fillWidth: true; elide: Text.ElideRight }
-                                Label { text: "交易前现金 " + money(modelData.cashBefore); color: "#64748b"; Layout.preferredWidth: 150; horizontalAlignment: Text.AlignRight }
-                                Label { text: "收盘净值 " + money(modelData.navAfter); color: "#64748b"; Layout.preferredWidth: 140; horizontalAlignment: Text.AlignRight }
+                                Label { text: modelData.reason || ""; color: AppTheme.textFaint; Layout.fillWidth: true; elide: Text.ElideRight }
+                                Label { text: "交易前现金 " + money(modelData.cashBefore); color: AppTheme.textFaint; Layout.preferredWidth: 150; horizontalAlignment: Text.AlignRight }
+                                Label { text: "收盘净值 " + money(modelData.navAfter); color: AppTheme.textFaint; Layout.preferredWidth: 140; horizontalAlignment: Text.AlignRight }
                             }
                         }
                     }

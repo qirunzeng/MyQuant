@@ -5,9 +5,9 @@ Canvas {
     property var points: []
     property string valueRole: "nav"
     property string secondRole: ""
-    property color lineColor: "#38bdf8"
+    property color lineColor: AppTheme.accent
     property color secondColor: "#f97316"
-    property color gridColor: "#273545"
+    property color gridColor: AppTheme.border
     property string formatMode: "number"
     property int decimals: 2
     property bool showLabels: true
@@ -131,7 +131,7 @@ Canvas {
         var ctx = getContext("2d")
         ctx.reset()
         ctx.clearRect(0, 0, width, height)
-        ctx.fillStyle = "#0b1117"
+        ctx.fillStyle = AppTheme.surface
         ctx.fillRect(0, 0, width, height)
 
         var r = plotRect()
@@ -205,15 +205,15 @@ Canvas {
 
         if (showLabels) {
             ctx.font = "11px sans-serif"
-            ctx.fillStyle = "#7890a8"
+            ctx.fillStyle = AppTheme.textFaint
             ctx.textAlign = "left"
             ctx.fillText(formatValue(primary.max), 6, r.top + 8)
             ctx.fillText(formatValue(primary.min), 6, r.bottom - 2)
             ctx.fillText(String(points[viewStartIndex].date || ""), r.left, height - 7)
             ctx.textAlign = "right"
-            ctx.fillStyle = "#9fb2c7"
+            ctx.fillStyle = AppTheme.textMuted
             ctx.fillText((labelPrefix.length > 0 ? labelPrefix + " " : "末值 ") + formatValue(primary.last), width - 8, 15)
-            ctx.fillStyle = "#7890a8"
+            ctx.fillStyle = AppTheme.textFaint
             ctx.fillText(String(points[viewEndIndex].date || ""), width - 8, height - 7)
         }
 
@@ -223,7 +223,7 @@ Canvas {
             if (isFinite(hv)) {
                 var hx = xAt(hoverIndex)
                 var hy = yAt(hv, primary)
-                ctx.strokeStyle = "#64748b"
+                ctx.strokeStyle = AppTheme.textFaint
                 ctx.setLineDash([4, 4])
                 ctx.beginPath()
                 ctx.moveTo(hx, r.top)
@@ -237,14 +237,14 @@ Canvas {
                 var tw = Math.min(width - 16, Math.max(118, ctx.measureText(tip).width + 18))
                 var tx = Math.max(6, Math.min(width - tw - 6, hx + 10))
                 var ty = Math.max(6, hy - 32)
-                ctx.fillStyle = "#101b26"
-                ctx.strokeStyle = "#334155"
+                ctx.fillStyle = AppTheme.surface
+                ctx.strokeStyle = AppTheme.border
                 ctx.lineWidth = 1
                 ctx.beginPath()
                 ctx.rect(tx, ty, tw, 24)
                 ctx.fill()
                 ctx.stroke()
-                ctx.fillStyle = "#e8eef7"
+                ctx.fillStyle = AppTheme.text
                 ctx.textAlign = "left"
                 ctx.fillText(tip, tx + 9, ty + 16)
             }

@@ -6,20 +6,23 @@ Rectangle {
     id: root
     property string title: ""
     default property alias content: body.data
+    implicitWidth: 360
+    implicitHeight: panelLayout.implicitHeight + 28
 
     radius: 8
-    color: "#10161d"
-    border.color: "#233142"
+    color: AppTheme.surface
+    border.color: AppTheme.border
     border.width: 1
 
     ColumnLayout {
+        id: panelLayout
         anchors.fill: parent
         anchors.margins: 14
         spacing: 12
 
         Label {
             text: root.title
-            color: "#dbe7f4"
+            color: AppTheme.text
             font.pixelSize: 15
             font.bold: true
             Layout.fillWidth: true

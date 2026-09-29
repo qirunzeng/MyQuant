@@ -2,6 +2,7 @@
 #include "EtfRotationController.h"
 #include "NotesController.h"
 #include "SettingsController.h"
+#include "DividendController.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -20,11 +21,13 @@ int main(int argc, char* argv[]) {
     SettingsController settings;
     EtfRotationController etf(&settings);
     NotesController notes;
+    DividendController dividends(&settings);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("settingsController", &settings);
     engine.rootContext()->setContextProperty("etfController", &etf);
     engine.rootContext()->setContextProperty("notesController", &notes);
+    engine.rootContext()->setContextProperty("dividendController", &dividends);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] {
         QCoreApplication::exit(-1);

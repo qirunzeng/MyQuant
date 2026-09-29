@@ -7,11 +7,11 @@ Rectangle {
     property string label: ""
     property string value: ""
     property string hint: ""
-    property color accent: "#38bdf8"
+    property color accent: AppTheme.accent
 
     radius: 8
-    color: "#121820"
-    border.color: "#243241"
+    color: AppTheme.surface
+    border.color: AppTheme.border
     border.width: 1
     implicitWidth: 160
     implicitHeight: 88
@@ -30,7 +30,7 @@ Rectangle {
         }
         Label {
             text: root.value
-            color: "#e8eef7"
+            color: AppTheme.text
             font.pixelSize: 22
             font.bold: true
             elide: Text.ElideRight
@@ -44,7 +44,7 @@ Rectangle {
         }
         Label {
             text: root.hint
-            color: "#718196"
+            color: AppTheme.textFaint
             font.pixelSize: 11
             elide: Text.ElideRight
             Layout.fillWidth: true

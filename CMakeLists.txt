@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-project(MyQuant VERSION 0.1.0 LANGUAGES CXX)
+project(MyQuant VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,7 +72,11 @@ qt_add_executable(MyQuant
     src/EtfRotationController.h
     src/NotesController.cpp
     src/NotesController.h
+    src/DividendController.cpp
+    src/DividendController.h
 )
+
+set_source_files_properties(qml/components/AppTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(MyQuant
     URI MyQuant
@@ -84,9 +88,13 @@ qt_add_qml_module(MyQuant
         qml/components/MetricCard.qml
         qml/components/SectionPanel.qml
         qml/components/TradeChart.qml
+        qml/components/AppTheme.qml
+        qml/components/AppTabButton.qml
+        qml/components/AppRowButton.qml
         qml/pages/EtfPage.qml
         qml/pages/NotesPage.qml
         qml/pages/SettingsPage.qml
+        qml/pages/DividendPage.qml
 )
 
 target_link_libraries(MyQuant
@@ -231,8 +239,12 @@ add_executable(myquant_smoke_tests
     src/SettingsController.cpp
     src/EtfRotationController.cpp
     src/NotesController.cpp
+    src/DividendController.cpp
 )
 target_link_libraries(myquant_smoke_tests
     PRIVATE Qt6::Core Qt6::Gui Qt6::Sql Qt6::Network
 )
 add_test(NAME myquant_smoke_tests COMMAND myquant_smoke_tests)
+set_tests_properties(myquant_smoke_tests PROPERTIES
+    ENVIRONMENT "QT_PLUGIN_PATH=$<TARGET_BUNDLE_DIR:MyQuant>/Contents/PlugIns"
+)
