@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build/macos-release"
 APP="${BUILD_DIR}/MyQuant.app"
 DIST_DIR="${ROOT_DIR}/dist"
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 
 VERSION="$(sed -nE 's/^project\(MyQuant VERSION ([0-9.]+).*/\1/p' "${ROOT_DIR}/CMakeLists.txt")"
 if [[ -z "${VERSION}" ]]; then
@@ -52,6 +53,14 @@ ditto -c -k --sequesterRsrc --keepParent "${STAGING_APP}" "${ARCHIVE}"
     cd "${DIST_DIR}"
     shasum -a 256 "$(basename "${ARCHIVE}")" > "$(basename "${CHECKSUM}")"
 )
+
+# A discoverable app bundle in the build tree is indexed by Spotlight and
+# appears as a second MyQuant. The verified archive is now the release artifact,
+# so unregister and remove only the transient build-tree bundle.
+if [[ -x "${LSREGISTER}" ]]; then
+    "${LSREGISTER}" -u "${APP}" >/dev/null 2>&1 || true
+fi
+rm -rf "${APP}"
 
 echo "${ARCHIVE}"
 echo "${CHECKSUM}"
