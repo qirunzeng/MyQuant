@@ -1,0 +1,52 @@
+name: Publish verified desktop release
+
+on:
+  push:
+    tags:
+      - 'v0.2.0-desktop.*'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified Windows and macOS packages
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 37273392013
+          pattern: MyQuant-*-release
+          merge-multiple: true
+          path: release-assets
+      - name: Validate packages and create checksums
+        shell: bash
+        run: |
+          test -f release-assets/MyQuant-0.2.0-windows.zip
+          test -f release-assets/MyQuant-0.2.0-macos.zip
+          cd release-assets
+          sha256sum MyQuant-0.2.0-windows.zip MyQuant-0.2.0-macos.zip > SHA256SUMS.txt
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          cat > release-notes.txt <<'EOF'
+          MyQuant 0.2.0 desktop packages for Windows x64 and macOS Apple Silicon.
+
+          Download the ZIP for your system, extract it, and open MyQuant.exe (Windows) or MyQuant.app (macOS).
+
+          Both packages were built from a7bdf111b30c3fcabee9a3eff6e058aed204ed31 with Qt 6.8.3 and passed controller/database smoke tests and deployed startup verification:
+          https://github.com/qirunzeng/MyQuant/actions/runs/37273392013
+
+          Windows: MSVC x64. macOS: Apple Silicon; ad-hoc signed, not notarized. Intel macOS is not verified for this package.
+          Application runtime version remains 0.2.0; desktop.1 identifies this cross-platform packaging revision.
+
+          User data is stored outside the application. Close MyQuant before upgrading and keep a private backup of the runtime folder. These ZIPs do not contain personal databases or account data.
+          Python/AkShare are optional external dependencies and must be configured separately for live data refresh.
+          EOF
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "MyQuant 0.2.0 — Windows & macOS" --notes-file release-notes.txt release-assets/MyQuant-0.2.0-windows.zip release-assets/MyQuant-0.2.0-macos.zip release-assets/SHA256SUMS.txt
