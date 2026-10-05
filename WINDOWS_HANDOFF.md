@@ -2,6 +2,26 @@
 
 Updated: 2026-10-02
 
+## Windows continuation — 2026-10-05
+
+- Added Windows Ninja configure/build/test presets, conditional bundle flags,
+  Windows ICO/version resources, CMake-derived runtime version, and MSVC UTF-8.
+- Fixed Windows account JSON replacement while a read handle remained open.
+- Fixed Windows test plugin/DLL lookup and Python's default executable name.
+- Added clean `windeployqt` ZIP packaging, MSYS2 DLL dependency collection,
+  explicit deployed Qt paths, and side-by-side upgrades preserving runtime data.
+- Verified Release build and smoke tests with UCRT64 GCC 15.2 / Qt 6.10.0,
+  including Python helper invocation with Chinese characters and spaces.
+- Reviewed 64 isolated software-rendered UI captures: four pages, light/dark,
+  900/1440 logical pixel widths, and 100/125/150/200 percent scaling.
+- Verified deployed Windows platform / SQLite / QML startup in a Chinese/space
+  installation directory with Qt development paths removed. No runtime data
+  is included in the ZIP.
+- Native monitor interaction, populated real-data migration, and live AkShare
+  network refresh remain unverified. Original runtime data was not touched.
+- Instructions: `docs/WINDOWS_BUILD.md`. Earlier gap list below is retained as
+  historical context; items 1, 3–8, and initial capture coverage are now addressed.
+
 This document is a technical handoff for continuing MyQuant development with
 Codex on Windows. It intentionally contains no brokerage account identifiers,
 holding details, API keys, or other runtime data.

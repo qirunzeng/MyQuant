@@ -7,6 +7,8 @@
 #include <QDate>
 #include <QDebug>
 #include <QTemporaryDir>
+#include <QFile>
+#include <QProcess>
 
 #include <cmath>
 
@@ -29,6 +31,20 @@ int main(int argc, char** argv) {
     QTemporaryDir dir;
     CHECK(dir.isValid());
     qputenv("MYQUANT_HOME", dir.path().toUtf8());
+
+    const QString testPython = qEnvironmentVariable("MYQUANT_TEST_PYTHON");
+    if (!testPython.isEmpty()) {
+        QFile helper(dir.filePath(QString::fromUtf8("路径 with spaces.py")));
+        CHECK(helper.open(QIODevice::WriteOnly));
+        CHECK(helper.write("import sys\nprint(sys.argv[1])\n") > 0);
+        helper.close();
+        QProcess python;
+        python.start(testPython, {helper.fileName(), "argument with spaces"});
+        CHECK(python.waitForStarted());
+        CHECK(python.waitForFinished());
+        CHECK(python.exitCode() == 0);
+        CHECK(python.readAllStandardOutput().trimmed() == "argument with spaces");
+    }
 
     SettingsController settings;
     CHECK(settings.save());

@@ -490,6 +490,7 @@ bool EtfRotationController::savePortfolio(double availableCash, const QVariantLi
     QFile existingAccount(accountPath());
     if (existingAccount.open(QIODevice::ReadOnly | QIODevice::Text))
         accountObj = QJsonDocument::fromJson(existingAccount.readAll()).object();
+    existingAccount.close(); // Windows cannot atomically replace an open file.
     accountObj.insert("availableCash", std::max(0.0, availableCash));
     if (!accountObj.contains("runConfig")) {
         accountObj.insert("runConfig", QJsonObject{{"startDate", "20210101"},
@@ -544,6 +545,7 @@ bool EtfRotationController::saveRunConfig(const QString& startDate, const QStrin
     QFile existing(accountPath());
     if (existing.open(QIODevice::ReadOnly | QIODevice::Text))
         accountObj = QJsonDocument::fromJson(existing.readAll()).object();
+    existing.close();
     accountObj.insert("availableCash", std::max(0.0, availableCash));
     accountObj.insert("runConfig", QJsonObject{{"startDate", compactDate(startDate).isEmpty() ? "20210101" : compactDate(startDate)},
                                                {"endDate", compactDate(endDate)},

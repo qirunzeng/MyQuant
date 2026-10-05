@@ -61,7 +61,6 @@ if(EXISTS "${MYQUANT_ICON}")
 endif()
 
 qt_add_executable(MyQuant
-    MACOSX_BUNDLE
     ${MYQUANT_ICON}
     src/main.cpp
     src/AppPaths.cpp
@@ -75,6 +74,24 @@ qt_add_executable(MyQuant
     src/DividendController.cpp
     src/DividendController.h
 )
+
+if(APPLE)
+    set_target_properties(MyQuant PROPERTIES MACOSX_BUNDLE TRUE)
+elseif(WIN32)
+    enable_language(RC)
+    configure_file(cmake/MyQuant.rc.in "${CMAKE_CURRENT_BINARY_DIR}/MyQuant.rc" @ONLY)
+    target_sources(MyQuant PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/MyQuant.rc")
+    set_target_properties(MyQuant PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+target_compile_definitions(MyQuant PRIVATE MYQUANT_VERSION="${PROJECT_VERSION}")
+option(MYQUANT_UI_VERIFY "Build isolated UI capture executable (not for release)" OFF)
+if(MYQUANT_UI_VERIFY)
+    target_compile_definitions(MyQuant PRIVATE MYQUANT_UI_VERIFY)
+endif()
+if(MSVC)
+    add_compile_options(/utf-8)
+    target_compile_options(MyQuant PRIVATE /utf-8)
+endif()
 
 set_source_files_properties(qml/components/AppTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -245,6 +262,19 @@ target_link_libraries(myquant_smoke_tests
     PRIVATE Qt6::Core Qt6::Gui Qt6::Sql Qt6::Network
 )
 add_test(NAME myquant_smoke_tests COMMAND myquant_smoke_tests)
+if(APPLE)
+    set(_MYQUANT_TEST_PLUGIN_DIR "$<TARGET_BUNDLE_DIR:MyQuant>/Contents/PlugIns")
+else()
+    set(_MYQUANT_TEST_PLUGIN_DIR "${_MYQUANT_QT_PREFIX}/share/qt6/plugins")
+    if(NOT EXISTS "${_MYQUANT_TEST_PLUGIN_DIR}")
+        set(_MYQUANT_TEST_PLUGIN_DIR "${_MYQUANT_QT_PREFIX}/plugins")
+    endif()
+endif()
 set_tests_properties(myquant_smoke_tests PROPERTIES
-    ENVIRONMENT "QT_PLUGIN_PATH=$<TARGET_BUNDLE_DIR:MyQuant>/Contents/PlugIns"
+    ENVIRONMENT "QT_PLUGIN_PATH=${_MYQUANT_TEST_PLUGIN_DIR};QT_FORCE_STDERR_LOGGING=1"
 )
+if(WIN32)
+    set_tests_properties(myquant_smoke_tests PROPERTIES
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${_MYQUANT_QT_PREFIX}/bin"
+    )
+endif()

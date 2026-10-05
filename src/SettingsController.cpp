@@ -17,6 +17,9 @@ SettingsController::SettingsController(QObject* parent) : QObject(parent) {
 }
 
 QString SettingsController::defaultPythonPath() {
+#ifdef Q_OS_WIN
+    return "python";
+#else
     const QStringList candidates = {
         "/opt/homebrew/Caskroom/miniconda/base/envs/etf/bin/python",
         "/opt/homebrew/bin/python3",
@@ -28,6 +31,7 @@ QString SettingsController::defaultPythonPath() {
             return candidate;
     }
     return "python3";
+#endif
 }
 
 QString SettingsController::configPath() const {

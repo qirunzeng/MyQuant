@@ -13,6 +13,9 @@ This repository is an independent implementation. It does not copy source code, 
 
 ## Build
 
+For Windows builds, ZIP deployment, safe upgrades, and isolated DPI captures,
+see [docs/WINDOWS_BUILD.md](docs/WINDOWS_BUILD.md).
+
 ```bash
 cmake --preset macos-release -DCMAKE_PREFIX_PATH="/path/to/Qt/6.8.3/macos"
 cmake --build --preset macos-release
