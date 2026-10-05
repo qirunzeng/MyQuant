@@ -4,6 +4,16 @@ Updated: 2026-10-02
 
 ## Windows continuation — 2026-10-05
 
+### Both-platform verification
+
+GitHub Actions run `37273392013` passed on Windows 2022 / MSVC and macOS 14 /
+Apple Silicon using Qt 6.8.3. Both jobs compiled the shared source, passed
+controller/database and Python path smoke tests, packaged the native app,
+and verified deployed startup with isolated data and no development Qt paths.
+Both ZIP packages are available as workflow artifacts. This is not a GitHub
+Release or a notarized macOS distribution. Intel macOS and interactive checks
+with migrated personal data have not been independently verified in this run.
+
 - Added Windows Ninja configure/build/test presets, conditional bundle flags,
   Windows ICO/version resources, CMake-derived runtime version, and MSVC UTF-8.
 - Fixed Windows account JSON replacement while a read handle remained open.

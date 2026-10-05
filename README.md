@@ -1,5 +1,7 @@
 # MyQuant
 
+[![Windows and macOS](https://github.com/qirunzeng/MyQuant/actions/workflows/desktop.yml/badge.svg)](https://github.com/qirunzeng/MyQuant/actions/workflows/desktop.yml)
+
 MyQuant is a personal desktop research and review tool for ETF rotation, trading notes, dividend planning, and local settings.
 
 This repository is an independent implementation. It does not copy source code, assets, brands, wording, or UI layouts from other products.
@@ -15,6 +17,11 @@ This repository is an independent implementation. It does not copy source code, 
 
 For Windows builds, ZIP deployment, safe upgrades, and isolated DPI captures,
 see [docs/WINDOWS_BUILD.md](docs/WINDOWS_BUILD.md).
+
+Windows and macOS share the same controllers and QML pages. GitHub Actions
+builds both platforms with Qt 6.8.3, runs database/controller smoke tests,
+and starts each deployed application with temporary data before uploading
+its ZIP as a workflow artifact. Artifacts are separate from GitHub Releases.
 
 ```bash
 cmake --preset macos-release -DCMAKE_PREFIX_PATH="/path/to/Qt/6.8.3/macos"
