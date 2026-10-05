@@ -1,0 +1,76 @@
+name: Windows and macOS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: ${{ matrix.os }} / Qt 6.8.3
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            preset: windows-release
+            arch: win64_msvc2022_64
+          - os: macos-14
+            preset: macos-release
+            arch: clang_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: ${{ matrix.arch }}
+          modules: qtsvg
+          cache: true
+      - name: Install Ninja
+        run: python -m pip install ninja
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT_DIR }}"
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }} --parallel 3
+      - name: Smoke tests
+        shell: bash
+        run: |
+          export MYQUANT_TEST_PYTHON="$(python -c 'import sys; print(sys.executable)')"
+          ctest --preset ${{ matrix.preset }}
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/package_windows.ps1 -QtBin "$env:QT_ROOT_DIR/bin"
+      - name: Verify Windows deployment
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          ./tools/update_windows.ps1 -Archive ./dist/MyQuant-0.2.0-windows.zip -InstallRoot './build/deployed with spaces'
+          $exe = (Get-ChildItem './build/deployed with spaces' -Recurse -Filter MyQuant.exe | Select-Object -First 1).FullName
+          python tests/check_desktop_startup.py "$exe" --clean-qt-path
+      - name: Verify macOS bundle
+        if: runner.os == 'macOS'
+        run: |
+          codesign --verify --deep --strict build/macos-release/MyQuant.app
+          test -f build/macos-release/MyQuant.app/Contents/PlugIns/sqldrivers/libqsqlite.dylib
+          python tests/check_desktop_startup.py build/macos-release/MyQuant.app/Contents/MacOS/MyQuant --clean-qt-path
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent build/macos-release/MyQuant.app dist/MyQuant-0.2.0-macos.zip
+      - name: Upload verified package
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyQuant-${{ matrix.preset }}
+          path: dist/MyQuant-0.2.0-*.zip
+          if-no-files-found: error

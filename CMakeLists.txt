@@ -55,12 +55,17 @@ configure_file(
     @ONLY
 )
 
-set(MYQUANT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/MyQuant.icns")
-if(EXISTS "${MYQUANT_ICON}")
+set(_MYQUANT_EXECUTABLE_OPTIONS)
+if(APPLE)
+    list(APPEND _MYQUANT_EXECUTABLE_OPTIONS MACOSX_BUNDLE)
+    set(MYQUANT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/MyQuant.icns")
     set_source_files_properties("${MYQUANT_ICON}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+elseif(WIN32)
+    list(APPEND _MYQUANT_EXECUTABLE_OPTIONS WIN32)
 endif()
 
 qt_add_executable(MyQuant
+    ${_MYQUANT_EXECUTABLE_OPTIONS}
     ${MYQUANT_ICON}
     src/main.cpp
     src/AppPaths.cpp
@@ -75,13 +80,10 @@ qt_add_executable(MyQuant
     src/DividendController.h
 )
 
-if(APPLE)
-    set_target_properties(MyQuant PROPERTIES MACOSX_BUNDLE TRUE)
-elseif(WIN32)
+if(WIN32)
     enable_language(RC)
     configure_file(cmake/MyQuant.rc.in "${CMAKE_CURRENT_BINARY_DIR}/MyQuant.rc" @ONLY)
     target_sources(MyQuant PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/MyQuant.rc")
-    set_target_properties(MyQuant PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 target_compile_definitions(MyQuant PRIVATE MYQUANT_VERSION="${PROJECT_VERSION}")
 option(MYQUANT_UI_VERIFY "Build isolated UI capture executable (not for release)" OFF)

@@ -50,6 +50,13 @@
   ],
   "testPresets": [
     {
+      "name": "macos-release",
+      "configurePreset": "macos-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
       "name": "windows-release",
       "configurePreset": "windows-release",
       "output": {
